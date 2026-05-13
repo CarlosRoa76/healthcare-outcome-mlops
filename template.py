@@ -25,7 +25,7 @@ list_of_files = [
     "Dockerfile",
     "stetup.py",
     "research/research.ipynb",
-    "templlates/index.html"
+    "templlates/index.html",
     ".env",
 ]
 
