@@ -11,8 +11,8 @@ class CustomException(Exception):
         self.file_name = exc_tb.tb_frame.f_code.co_filename
 
     def __str__(self):
-        self.file_name, self.lineno, str(self.error_message)
-
+        return f"Error occurred in script: {self.file_name} at line number: {self.lineno} with error message: {self.error_message}"
+    
 if __name__ == "__main__":
     try:
         logger.logging.info("Testing custom exception")
