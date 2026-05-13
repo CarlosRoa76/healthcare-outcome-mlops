@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s]: %(message)s')
 
-project_name = "stroke_prediction"
+project_name = "healthcare_outcome_mlops"
 
 list_of_files = [
     ".github/workflows/.gitkeep",
