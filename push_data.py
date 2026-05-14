@@ -6,8 +6,8 @@ import numpy as np
 import pymongo
 import logging
 
-## from src.healthcare_outcome_mlops.exception.exception import CustomException
-## from src.healthcare_outcome_mlops.logging.logger import logging
+from healthcare_outcome_mlops.exception.exception import CustomException
+from healthcare_outcome_mlops.logging.logger import logging
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -31,8 +31,7 @@ class HealthcareDataExtract():
             
         except Exception as e:
             logging.error(f"Error in csv_to_json method: {e}")
-            raise e
-            # raise CustomException(e, sys)
+            raise CustomException(e, sys)
 
     def insert_data_to_mongodb(self, records, database_name, collection_name):
         try:
@@ -47,8 +46,7 @@ class HealthcareDataExtract():
             return(len(records))
         except Exception as e:
             logging.error(f"Error in insert_data_to_mongodb method: {e}")
-            raise e
-            #raise CustomException(e, sys)
+            CustomException(e, sys)
 
 
 if __name__ == "__main__":

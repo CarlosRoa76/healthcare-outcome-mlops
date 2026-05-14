@@ -1,6 +1,7 @@
 numpy
 pandas
 python-dotenv
-pymongo[svr]==3.6
+pymongo>=4.0
 certifi
+scikit-learn
 ###-e .
