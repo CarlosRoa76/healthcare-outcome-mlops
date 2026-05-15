@@ -12,16 +12,7 @@ import numpy as np
 from dotenv import load_dotenv
 load_dotenv()
 
-MONGODB_URI = os.getenv("MONGODB_URI")
-
-import os
-from dotenv import load_dotenv
-
-# This ensures it finds the .env file in your current working directory
-load_dotenv(os.path.join(os.getcwd(), '.env'))
-
-MONGODB_URI = os.getenv("MONGODB_URI")
-print(f"DEBUG: Connection string is: {MONGODB_URI}")
+MONGODB_URL = os.getenv("MONGO_DB_URL")
 
 class DataIngestion:
     def __init__(self, data_ingestion_config:DataIngestionConfig):
@@ -35,7 +26,7 @@ class DataIngestion:
         try:
             database_name = self.data_ingestion_config.database_name
             collection_name = self.data_ingestion_config.collection_name
-            self.mongo_client = pymongo.MongoClient(MONGODB_URI)
+            self.mongo_client = pymongo.MongoClient(MONGODB_URL)
             collection = self.mongo_client[database_name][collection_name]
             
             df = pd.DataFrame(list(collection.find()))
