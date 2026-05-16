@@ -1,0 +1,16 @@
+columns:
+  - Name: object
+  - Age: int64
+  - Gender: object
+  - Blood Type: object
+  - Medical Condition: object
+  - Date of Admission: object
+  - Doctor: object
+  - Hospital: object
+  - Insurance Provider: object
+  - Billing Amount: float64
+  - Room Number: int64
+  - Admission Type: object
+  - Discharge Date: object
+  - Medication: object
+  - Test Results: object

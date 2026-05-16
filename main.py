@@ -1,8 +1,9 @@
 from healthcare_outcome_mlops.components.data_ingestion import DataIngestion
 from healthcare_outcome_mlops.logging.logger import logging
 from healthcare_outcome_mlops.exception.exception import CustomException
-from healthcare_outcome_mlops.entity.config_entity import DataIngestionConfig,TrainigPipelineConfig
+from healthcare_outcome_mlops.entity.config_entity import DataIngestionConfig,TrainigPipelineConfig, DataValidationConfig
 import sys
+from healthcare_outcome_mlops.components.data_validation import DataValidation
 
 
 if __name__ == "__main__":
@@ -12,6 +13,13 @@ if __name__ == "__main__":
         data_ingestion = DataIngestion(dataingestionconfig)
         logging.info("Data ingestion completed successfully")
         data_ingestion_artifact = data_ingestion.initiate_data_ingestion()
-        print("data_ingestion_artifact",data_ingestion_artifact)
+        print(data_ingestion_artifact)
+        logging.info("Data Initiation Completed")
+        data_validation_config = DataValidationConfig(training_pipeline_config)
+        data_validation = DataValidation(data_ingestion_artifact, data_validation_config)
+        logging.info("Initiate the data validation")
+        data_validation_artifact = data_validation.initiate_data_validation()
+        logging.info("Data Validation Completed")
+        print(data_validation_artifact)
     except Exception as e:
         raise CustomException(e,sys)
