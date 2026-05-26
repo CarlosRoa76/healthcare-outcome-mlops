@@ -13,10 +13,31 @@ from healthcare_outcome_mlops.utils.main_utils.utils import load_numpy_array_dat
 
 # Shifted utility from regression to classification metrics
 from healthcare_outcome_mlops.utils.ml_utils.metric.classification_metric import get_classification_score
+from healthcare_outcome_mlops.utils.main_utils.utils import evaluate_models
+
 
 # Industry standard algorithms for clinical tabular/categorical matrices
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import r2_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import (
+    AdaBoostClassifier,
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+)
+import mlflow
+from urllib.parse import urlparse
+
+from dotenv import load_dotenv
+load_dotenv()
+
+REPO_OWNER = os.getenv("REPO_OWNER")
+REPO_NAME = os.getenv("REPO_NAME")
+
+import dagshub
+dagshub.init(repo_owner=REPO_OWNER, repo_name=REPO_NAME, mlflow=True)
+
 
 class ModelTrainer:
     def __init__(
@@ -30,6 +51,32 @@ class ModelTrainer:
         except Exception as e:
             raise CustomException(e, sys)
         
+    def track_mlflow(self,best_model,classificationmetric):
+        mlflow.set_registry_uri("https://dagshub.com/krishnaik06/networksecurity.mlflow")
+        tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
+        with mlflow.start_run():
+            f1_score=classificationmetric.f1_score
+            precision_score=classificationmetric.precision_score
+            recall_score=classificationmetric.recall_score
+
+            
+
+            mlflow.log_metric("f1_score",f1_score)
+            mlflow.log_metric("precision",precision_score)
+            mlflow.log_metric("recall_score",recall_score)
+            mlflow.sklearn.log_model(best_model,"model")
+            # Model registry does not work with file store
+            if tracking_url_type_store != "file":
+
+                # Register the model
+                # There are other ways to use the Model Registry, which depends on the use case,
+                # please refer to the doc for more information:
+                # https://mlflow.org/docs/latest/model-registry.html#api-workflow
+                mlflow.sklearn.log_model(best_model, "model", registered_model_name=best_model)
+            else:
+                mlflow.sklearn.log_model(best_model, "model")
+
+        
     def train_model(self, x_train, y_train, x_test, y_test):
         """
         Runs hyperparameter tuning across models and returns the best performing tuned asset.
@@ -38,29 +85,40 @@ class ModelTrainer:
         try:
             # 1. Define base model architectures
             models = {
-                "LogisticRegression": LogisticRegression(max_iter=1000, random_state=42),
-                "RandomForest": RandomForestClassifier(random_state=42),
-                "GradientBoosting": GradientBoostingClassifier(random_state=42)
-            }
+                "Random Forest": RandomForestClassifier(),
+                "Decision Tree": DecisionTreeClassifier(),
+                "Gradient Boosting": GradientBoostingClassifier(),
+                "Logistic Regression": LogisticRegression(),
+                "AdaBoost": AdaBoostClassifier(),
+                }
 
             # 2. Define search spaces for tuning (Keep spaces light for initial execution speed)
-            params = {
-                "LogisticRegression": {
-                    "C": [0.1, 1.0, 10.0]
+            params={
+            "Decision Tree": {
+                #'criterion':['gini', 'entropy', 'log_loss'],
+                #'splitter':['best','random'],
+                #'max_features':['sqrt','log2'],
                 },
-                "RandomForest": {
-                    "n_estimators": [50, 100, 150],
-                    "max_depth": [10, 20, None],
-                    "min_samples_split": [2, 5]
+            "Random Forest":{
+                #'criterion':['gini', 'entropy', 'log_loss'],
+                #'max_features':['sqrt','log2',None],
+                #'n_estimators': [8,16,32,128,256]
                 },
-                "GradientBoosting": {
-                    "learning_rate": [0.05, 0.1],
-                    "n_estimators": [50, 100]
+            "Gradient Boosting":{
+                #'loss':['log_loss', 'exponential'],
+                #'learning_rate':[.1,.01,.05,.001],
+                #'subsample':[0.6,0.7,0.75,0.85,0.9],
+                #'criterion':['squared_error', 'friedman_mse'],
+                #'max_features':['auto','sqrt','log2'],
+                #'n_estimators': [8,16,32,64,128,256]
+                },
+            "Logistic Regression":{},
+            "AdaBoost":{
+                #'learning_rate':[.1,.01,.001],
+                #'n_estimators': [8,16,32,64,128,256]
                 }
             }
 
-            # Import the utility function we fixed
-            from healthcare_outcome_mlops.utils.main_utils.utils import evaluate_models
 
             # 3. Run the hyperparameter grid tuning tournament
             model_report: dict = evaluate_models(
@@ -114,8 +172,12 @@ class ModelTrainer:
             y_train_pred = best_model.predict(x_train)
             train_metric_artifact = get_classification_score(y_true=y_train, y_pred=y_train_pred)
 
+            self.track_mlflow(best_model, train_metric_artifact)
+
             y_test_pred = best_model.predict(x_test)
             test_metric_artifact = get_classification_score(y_true=y_test, y_pred=y_test_pred)
+
+            self.track_mlflow(best_model, test_metric_artifact)
 
             # FIX: Load the saved preprocessor object from your transformation artifacts path
             preprocessing_obj = load_object(file_path=self.data_transformation_artifact.transformed_object_file_path)
