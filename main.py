@@ -5,6 +5,8 @@ from healthcare_outcome_mlops.entity.config_entity import DataIngestionConfig,Tr
 from healthcare_outcome_mlops.components.data_validation import DataValidation
 from healthcare_outcome_mlops.components.data_ingestion import DataIngestion
 from healthcare_outcome_mlops.components.data_transformation import DataTransformation
+from healthcare_outcome_mlops.components.model_trainer import ModelTrainer
+from healthcare_outcome_mlops.entity.config_entity import ModelTrainerConfig
 
 if __name__ == "__main__":
     try:
@@ -25,7 +27,13 @@ if __name__ == "__main__":
         logging.info("Data Transformation Started")
         data_transformation = DataTransformation(data_validation_artifact, data_transformation_config)
         data_transformation_artifact = data_transformation.initiate_data_transformation()
-        print(data_transformation_artifact)
         logging.info("Data Transformation Completed")
+        logging.info("Model Training Stared")
+        model_trainer_config=ModelTrainerConfig(training_pipeline_config)
+        model_trainer=ModelTrainer(model_trainer_config=model_trainer_config,data_transformation_artifact=data_transformation_artifact)
+        model_trainer_artifact=model_trainer.initiate_model_trainer()
+        logging.info("Model Training artifact created")
+
+
     except Exception as e:
         raise CustomException(e,sys)

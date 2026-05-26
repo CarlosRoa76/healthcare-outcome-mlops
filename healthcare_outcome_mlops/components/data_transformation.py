@@ -73,16 +73,18 @@ class DataTransformation:
             train_df = DataTransformation.read_data(self.data_validation_artifact.valid_train_file_path)
             test_df = DataTransformation.read_data(self.data_validation_artifact.valid_test_file_path)
 
-
+            # Separate target and training inputs
             input_feature_train_df = train_df.drop(columns=[TARGET_COLUMN], axis=1)
             target_feature_train_df = train_df[TARGET_COLUMN]
-            target_feature_train_df = target_feature_train_df.replace(-1, 0)
 
+            # FIX: Map text target classes to explicit numbers
+            target_mapping = {"Normal": 0, "Abnormal": 1, "Inconclusive": 2}
+            target_feature_train_df = target_feature_train_df.map(target_mapping)
 
+            # Separate target and testing inputs
             input_feature_test_df = test_df.drop(columns=[TARGET_COLUMN], axis=1)
             target_feature_test_df = test_df[TARGET_COLUMN]
-            target_feature_test_df = target_feature_test_df.replace(-1, 0)
-
+            target_feature_test_df = target_feature_test_df.map(target_mapping)
 
             preprocessor = self.get_data_transformer_object()
 
@@ -91,7 +93,7 @@ class DataTransformation:
             transformed_input_train_feature = preprocessor.fit_transform(input_feature_train_df)
             transformed_input_test_feature = preprocessor.transform(input_feature_test_df)
              
-
+            # Horizontal stacking now pairs pure numeric arrays flawlessly
             train_arr = np.c_[transformed_input_train_feature, np.array(target_feature_train_df)]
             test_arr = np.c_[transformed_input_test_feature, np.array(target_feature_test_df)]
 
@@ -105,7 +107,6 @@ class DataTransformation:
             save_numpy_array_data(self.data_transformation_config.transformed_train_file_path, array=train_arr)
             save_numpy_array_data(self.data_transformation_config.transformed_test_file_path, array=test_arr)
             
-
             save_object(self.data_transformation_config.transformed_object_file_path, preprocessor)
             save_object("final_model/preprocessor.pkl", preprocessor)
 

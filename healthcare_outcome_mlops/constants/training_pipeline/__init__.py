@@ -15,6 +15,9 @@ TEST_FILE_NAME: str = "test.csv"
 
 SCHEMA_FILE_PATH = os.path.join("data_schema", "schema.yaml")
 
+SAVED_MODEL_DIR = os.path.join("saved_models")
+MODEL_FILE_NAME = "model.pkl"
+
 "Data Ingestion"
 
 DATA_INGESTION_COLLECTION_NAME: str = "healthcare_data"
@@ -39,6 +42,13 @@ DATA_TRANSFORMATION_DIR_NAME: str = "data_transformation"
 DATA_TRANSFORMATION_TRANSFORMED_DATA_DIR: str = "transformed"
 DATA_TRANSFORMATION_TRANSFORMED_OBJECT_DIR: str = "transformed_object"
 
-# New production imputation & encoding configurations
 DATA_TRANSFORMATION_NUMERICAL_IMPUTE_STRATEGY: str = "median"
 DATA_TRANSFORMATION_CATEGORICAL_IMPUTE_STRATEGY: str = "most_frequent"
+
+#Model Trainer
+
+MODEL_TRAINER_DIR_NAME: str = "model_trainer"
+MODEL_TRAINER_TRAINED_MODEL_DIR: str = "trained_model"
+MODEL_TRAINER_MODEL_NAME: str = "model.pkl"
+MODEL_TRAINER_EXPECTED_SCORE: str = 0.6
+MODEL_TRAINER_OVER_FITTING_UNDER_FITTING: str = 0.05
