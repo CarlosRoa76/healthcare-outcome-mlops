@@ -8,4 +8,5 @@ dill
 pyaml
 mlflow
 dagshub
+scipy
 ###-e .
